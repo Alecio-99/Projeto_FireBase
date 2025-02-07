@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { db } from './firebaseConnection'
-import { doc, setDoc, collection, addDoc, getDoc, getDocs } from 'firebase/firestore'
+import { doc, setDoc, collection, addDoc, getDoc, getDocs, updateDoc } from 'firebase/firestore'
 import './app.css'
 
 
@@ -10,6 +10,8 @@ const [titulo, setTitulo] = useState('');
 const [autor, setAutor] = useState('');
 
 const [posts, setPosts] = useState([]);
+
+const [idpost, setIdPost] = useState('');
 
 async function handleAdd() {
 
@@ -23,7 +25,7 @@ async function handleAdd() {
   .catch((error) =>{
     console.log("Gerou erro" + error)
   })*/
-
+  // essa função casdastra autor com id automatico
     await addDoc(collection(db, "posts"), {
       titulo: titulo,
       autor: autor
@@ -39,7 +41,7 @@ async function handleAdd() {
 }
 
 async function buscarPost() {
-
+// Essa função busca os posts por id
  /* const docFef = doc(db, "posts", "12345");
 
    await getDoc(docFef)
@@ -51,7 +53,7 @@ async function buscarPost() {
    .catch((error) =>{
      console.log("deu erro" + error)
    })*/
-
+  // essa função busca todos os posts por id
      const postsRef = collection(db, "posts");
 
      await getDocs(postsRef)
@@ -73,11 +75,39 @@ async function buscarPost() {
       console.log("Deu erro" + error)
      })
   }
+    
+  async function atualizarPost(){
+
+    const docRef = doc(db, "posts", idpost)
+    await updateDoc(docRef, {
+      titulo: titulo,
+      autor: autor
+    })
+    .then(() => {
+      console.log("Post atualizado")
+      setIdPost('')
+      setTitulo('')
+      setAutor('')
+    })
+    .catch(() =>{
+      console.log("Erro ao atualizar post")
+    })
+
+  }
+
   return (
     <div>
       <h1>App fire</h1>
 
       <div className="container">
+
+        <label>ID do post</label>
+        <input
+        placeholder='Digite o id do post'
+        value={idpost}
+        onChange={(e) => setIdPost(e.target.value)}
+        /> <br/>
+
         <label>Titulo:</label>
         <textarea 
         type = "text"
@@ -95,10 +125,13 @@ async function buscarPost() {
         <button onClick={handleAdd}>Cadastrar</button>
         <button onClick={buscarPost}>Buscar posts</button>
 
+        <button onClick={atualizarPost}>Atualizar Post</button>
+
         <ul>
           {posts.map( (post) =>{
             return(
               <li key={post.id}>
+                <strong>ID: {post.id}</strong> <br/>
                 <span>Titulo: {post.titulo} </span> <br/>
                 <span>Autor: {post.autor}</span> <br/>
               </li>
