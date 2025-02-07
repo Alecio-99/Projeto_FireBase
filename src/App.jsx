@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { db } from './firebaseConnection'
-import { doc, setDoc, collection, addDoc, getDoc } from 'firebase/firestore'
+import { doc, setDoc, collection, addDoc, getDoc, getDocs } from 'firebase/firestore'
 import './app.css'
 
 
@@ -8,6 +8,8 @@ function App() {
 
 const [titulo, setTitulo] = useState('');
 const [autor, setAutor] = useState('');
+
+const [posts, setPosts] = useState([]);
 
 async function handleAdd() {
 
@@ -38,7 +40,7 @@ async function handleAdd() {
 
 async function buscarPost() {
 
-  const docFef = doc(db, "posts", "12345");
+ /* const docFef = doc(db, "posts", "12345");
 
    await getDoc(docFef)
    
@@ -48,7 +50,28 @@ async function buscarPost() {
    })
    .catch((error) =>{
      console.log("deu erro" + error)
-   })
+   })*/
+
+     const postsRef = collection(db, "posts");
+
+     await getDocs(postsRef)
+     .then((snapshot) => {
+       let lista = [];
+
+       snapshot.forEach((doc) =>{
+        lista.push({
+          id: doc.id,
+          titulo: doc.data().titulo,
+          autor: doc.data().autor,
+        })
+       })
+
+       setPosts(lista);
+
+     })
+     .catch((error) => {
+      console.log("Deu erro" + error)
+     })
   }
   return (
     <div>
@@ -71,6 +94,18 @@ async function buscarPost() {
 
         <button onClick={handleAdd}>Cadastrar</button>
         <button onClick={buscarPost}>Buscar posts</button>
+
+        <ul>
+          {posts.map( (post) =>{
+            return(
+              <li key={post.id}>
+                <span>Titulo: {post.titulo} </span> <br/>
+                <span>Autor: {post.autor}</span> <br/>
+              </li>
+            )
+          })}
+        </ul>
+
       </div>
     </div>
   )
